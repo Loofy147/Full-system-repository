@@ -1,0 +1,20 @@
+{
+  "data_processing": {
+    "name": "Standard Data Pipeline",
+    "required_skill": "etl",
+    "steps": [
+      "extract",
+      "transform",
+      "load"
+    ]
+  },
+  "model_training": {
+    "name": "Supervised Learning Workflow",
+    "required_skill": "ml_training",
+    "steps": [
+      "feature_engineering",
+      "train",
+      "evaluate"
+    ]
+  }
+}
