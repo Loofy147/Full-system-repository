@@ -1,0 +1,30 @@
+{
+  "attack_scenarios": [
+    {
+      "id": "INJ-001",
+      "name": "SQL Injection on Auth",
+      "description": "A test SQL injection.",
+      "attack_type": "injection",
+      "target": "auth_service",
+      "payload": "1' OR '1'='1"
+    },
+    {
+      "id": "DOS-001",
+      "name": "Request Flood on API",
+      "description": "A test DoS attack.",
+      "attack_type": "resource_exhaustion",
+      "target": "api_gateway",
+      "payload": {
+        "requests": 500
+      }
+    },
+    {
+      "id": "FUZ-001",
+      "name": "State Fuzzing on HRL Manager",
+      "description": "A test state fuzzing attack.",
+      "attack_type": "state_fuzzing",
+      "target": "hrl_manager",
+      "payload": {}
+    }
+  ]
+}

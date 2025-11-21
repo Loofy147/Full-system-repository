@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Système Multi-Ecosystem Dashboard</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Système Multi-Ecosystem Dashboard</h1>
+            <div class="controls">
+                <label for="red-team-toggle">Red Team Mode:</label>
+                <label class="switch">
+                    <input type="checkbox" id="red-team-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+        </header>
+
+        <main>
+            <div id="ecosystem-grid" class="ecosystem-grid">
+                <!-- Ecosystem nodes will be dynamically inserted here -->
+            </div>
+        </main>
+
+        <footer>
+            <div id="log-output" class="log-output">
+                <div class="log-header">System Logs</div>
+                <ul id="log-list"></ul>
+            </div>
+        </footer>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
