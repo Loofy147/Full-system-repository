@@ -1,0 +1,130 @@
+flowchart TB
+    subgraph Client["🖥️ Client Layer"]
+        UI[Web Dashboard]
+        API[REST/GraphQL API]
+        CLI[CLI Tools]
+    end
+
+    subgraph Orchestration["🎯 LAYER 1: MEGA ORCHESTRATION"]
+        direction TB
+        MCP[("MCP Protocol Hub")]
+        A2A[("A2A Communication")]
+        Router["Task Router"]
+        State["State Store"]
+        
+        MCP <--> A2A
+        Router --> MCP
+        Router --> State
+    end
+
+    subgraph Intelligence["🧠 LAYER 2: HIERARCHICAL INTELLIGENCE"]
+        direction TB
+        subgraph HRL["HRL Core (Herarchecal-agent)"]
+            Manager["Manager Agent<br/>Q-Table + DQN"]
+            Worker1["Worker Agent 1<br/>UVFA"]
+            Worker2["Worker Agent 2<br/>UVFA"]
+            HER["HER Module"]
+            PER["PER Module"]
+            
+            Manager --> Worker1
+            Manager --> Worker2
+            Worker1 --> HER
+            Worker2 --> HER
+            HER --> PER
+        end
+        
+        subgraph ACE["ACE Engine (ACE-Agentic-Context-Engineering)"]
+            Generator["Generator"]
+            Reflector["Reflector"]
+            Curator["Curator"]
+            Playbook[("Playbook DB")]
+            
+            Generator --> Reflector
+            Reflector --> Curator
+            Curator --> Playbook
+            Playbook -.-> Generator
+        end
+        
+        HRL <--> ACE
+    end
+
+    subgraph Governance["🛡️ LAYER 3: AUTONOMOUS GOVERNANCE (outonomos-system)"]
+        direction TB
+        Gateway["Governance Gateway"]
+        Policies["Policy Engine"]
+        Scanner["Security Scanner"]
+        Audit[("Audit Log")]
+        HITL["HITL Escalation"]
+        
+        Gateway --> Policies
+        Gateway --> Scanner
+        Gateway --> Audit
+        Gateway --> HITL
+    end
+
+    subgraph Execution["⚡ LAYER 4: EXECUTION & MONITORING"]
+        direction TB
+        subgraph Services["Domain Services"]
+            Fin["Financial<br/>(Leak-detecteur)"]
+            Crypto["Crypto Portfolio<br/>(AI-Driven-Crypto)"]
+            Auto["Automation<br/>(Intellectual-intelligence)"]
+            Comm["Communication<br/>(Agents-box)"]
+        end
+        
+        subgraph Infra["Infrastructure (-Rainer-)"]
+            K8s["Kubernetes"]
+            Prom["Prometheus"]
+            Graf["Grafana"]
+        end
+        
+        subgraph Resilience["Resilience Patterns"]
+            CB["Circuit Breaker"]
+            Retry["Retry + Backoff"]
+            Fallback["Fallback Strategy"]
+        end
+        
+        Services --> Resilience
+        Infra --> Services
+    end
+
+    subgraph RedTeam["🎯 RED TEAM ENGINE"]
+        direction TB
+        AttackLib["Attack Library"]
+        Campaign["Campaign Runner"]
+        Evaluator["Vulnerability Evaluator"]
+        Report["Report Generator"]
+        
+        AttackLib --> Campaign
+        Campaign --> Evaluator
+        Evaluator --> Report
+    end
+
+    Client --> Orchestration
+    Orchestration --> Intelligence
+    Orchestration --> Governance
+    Orchestration --> Execution
+    
+    RedTeam -.->|"Adversarial Tests"| Orchestration
+    RedTeam -.->|"Adversarial Tests"| Intelligence
+    RedTeam -.->|"Adversarial Tests"| Governance
+    RedTeam -.->|"Adversarial Tests"| Execution
+    
+    Governance -->|"Validate"| Intelligence
+    Governance -->|"Validate"| Execution
+    
+    Intelligence -->|"Execute Tasks"| Execution
+    Execution -->|"Feedback"| Intelligence
+
+    classDef layer1 fill:#9333ea,stroke:#7c3aed,color:#fff
+    classDef layer2 fill:#3b82f6,stroke:#2563eb,color:#fff
+    classDef layer3 fill:#10b981,stroke:#059669,color:#fff
+    classDef layer4 fill:#f97316,stroke:#ea580c,color:#fff
+    classDef redteam fill:#ef4444,stroke:#dc2626,color:#fff
+    classDef database fill:#374151,stroke:#4b5563,color:#fff
+
+    class MCP,A2A,Router,State layer1
+    class Manager,Worker1,Worker2,HER,PER,Generator,Reflector,Curator layer2
+    class Gateway,Policies,Scanner,HITL layer3
+    class Fin,Crypto,Auto,Comm,K8s,Prom,Graf,CB,Retry,Fallback layer4
+    class AttackLib,Campaign,Evaluator,Report redteam
+    class Playbook,Audit database

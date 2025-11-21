@@ -1,0 +1,251 @@
+import React, { useState, useEffect, useCallback } from 'react';
+import { Play, Pause, AlertTriangle, CheckCircle, XCircle, Zap, Brain, Shield, Network, Target, Activity, Layers, GitBranch, Radio, Database, Cpu, Box, RefreshCw } from 'lucide-react';
+
+const SystemeOrchestrator = () => {
+  const [activeLayer, setActiveLayer] = useState('orchestration');
+  const [systemState, setSystemState] = useState({
+    health: 92,
+    agents: 7,
+    activeTests: 3,
+    failuresFound: 12,
+    uptime: '47h 23m'
+  });
+  const [redTeamMode, setRedTeamMode] = useState(false);
+  const [logs, setLogs] = useState([]);
+  const [ecosystems, setEcosystems] = useState({
+    hrl: { status: 'active', health: 95, repo: 'Herarchecal-agent' },
+    ace: { status: 'active', health: 88, repo: 'ACE-Agentic-Context-Engineering' },
+    governance: { status: 'pending', health: 0, repo: 'outonomos-system' },
+    communication: { status: 'active', health: 82, repo: 'Agents-box-comunication' },
+    automation: { status: 'active', health: 90, repo: 'Intellectual-intelligence.-' },
+    infrastructure: { status: 'active', health: 94, repo: '-Rainer-' },
+    financial: { status: 'active', health: 87, repo: 'Leak-detecteur' },
+    crypto: { status: 'active', health: 79, repo: '-AI-Driven-Crypto-Portfolio-Manager-' }
+  });
+
+  const addLog = useCallback((type, msg) => {
+    setLogs(prev => [{id: Date.now(), type, message: msg, time: new Date().toLocaleTimeString()}, ...prev.slice(0,19)]);
+  }, []);
+
+  useEffect(() => {
+    if (redTeamMode) {
+      const interval = setInterval(() => {
+        const attacks = [
+          {eco: 'hrl', msg: 'Fuzzing Manager Q-table with adversarial states'},
+          {eco: 'ace', msg: 'Context injection attack on Curator module'},
+          {eco: 'communication', msg: 'Protocol poisoning via malformed signals'},
+          {eco: 'financial', msg: 'Rate limit bypass attempt on Anthropic API'},
+          {eco: 'crypto', msg: 'Adversarial market data injection'},
+          {eco: 'infrastructure', msg: 'K8s pod disruption simulation'},
+          {eco: 'automation', msg: 'API schema manipulation test'}
+        ];
+        const attack = attacks[Math.floor(Math.random() * attacks.length)];
+        const success = Math.random() > 0.6;
+        addLog(success ? 'failure' : 'success', `[${attack.eco.toUpperCase()}] ${attack.msg} - ${success ? 'VULNERABILITY FOUND' : 'Defended'}`);
+        setEcosystems(prev => ({
+          ...prev,
+          [attack.eco]: {...prev[attack.eco], health: Math.max(60, prev[attack.eco].health + (success ? -3 : 1))}
+        }));
+        if (success) setSystemState(prev => ({...prev, failuresFound: prev.failuresFound + 1}));
+      }, 2500);
+      return () => clearInterval(interval);
+    }
+  }, [redTeamMode, addLog]);
+
+  const layers = {
+    orchestration: {
+      title: 'Mega Orchestration Layer',
+      icon: Network,
+      color: 'from-purple-500 to-indigo-600',
+      description: 'Central coordination hub managing all ecosystem interactions via MCP/A2A protocols'
+    },
+    intelligence: {
+      title: 'Hierarchical Intelligence',
+      icon: Brain,
+      color: 'from-blue-500 to-cyan-600',
+      description: 'HRL-based agent core with Manager/Worker architecture and ACE context engineering'
+    },
+    governance: {
+      title: 'Autonomous Governance',
+      icon: Shield,
+      color: 'from-emerald-500 to-teal-600',
+      description: 'Compliance, security scanning, and human-in-the-loop escalation gateway'
+    },
+    execution: {
+      title: 'Execution & Monitoring',
+      icon: Activity,
+      color: 'from-orange-500 to-red-600',
+      description: 'Real-time task execution, adaptive learning, and anomaly detection'
+    }
+  };
+
+  const StatusBadge = ({status}) => {
+    const colors = {active: 'bg-emerald-500', pending: 'bg-amber-500', error: 'bg-red-500'};
+    return <span className={`px-2 py-0.5 rounded-full text-xs font-medium text-white ${colors[status]}`}>{status}</span>;
+  };
+
+  const HealthBar = ({value}) => (
+    <div className="w-full h-2 bg-gray-700 rounded-full overflow-hidden">
+      <div className={`h-full transition-all duration-500 ${value > 80 ? 'bg-emerald-500' : value > 60 ? 'bg-amber-500' : 'bg-red-500'}`} style={{width: `${value}%`}} />
+    </div>
+  );
+
+  return (
+    <div className="min-h-screen bg-gray-950 text-white p-4">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center">
+            <Layers className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-xl font-bold bg-gradient-to-r from-violet-400 to-purple-400 bg-clip-text text-transparent">Système Multi-Ecosystem</h1>
+            <p className="text-xs text-gray-400">Orchestrator v2.0 • Red Team Engineering</p>
+          </div>
+        </div>
+        <button
+          onClick={() => {setRedTeamMode(!redTeamMode); addLog('system', redTeamMode ? 'Red Team mode DEACTIVATED' : 'Red Team mode ACTIVATED - Initiating adversarial testing');}}
+          className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${redTeamMode ? 'bg-red-600 hover:bg-red-700 animate-pulse' : 'bg-gray-800 hover:bg-gray-700'}`}
+        >
+          <Target className="w-4 h-4" />
+          {redTeamMode ? 'Stop Red Team' : 'Start Red Team'}
+        </button>
+      </div>
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-5 gap-3 mb-6">
+        {[
+          {label: 'System Health', value: `${systemState.health}%`, icon: Activity, color: 'text-emerald-400'},
+          {label: 'Active Agents', value: systemState.agents, icon: Cpu, color: 'text-blue-400'},
+          {label: 'Active Tests', value: systemState.activeTests, icon: Zap, color: 'text-amber-400'},
+          {label: 'Failures Found', value: systemState.failuresFound, icon: AlertTriangle, color: 'text-red-400'},
+          {label: 'Uptime', value: systemState.uptime, icon: RefreshCw, color: 'text-purple-400'}
+        ].map((s,i) => (
+          <div key={i} className="bg-gray-900/50 border border-gray-800 rounded-xl p-3">
+            <div className="flex items-center gap-2 mb-1">
+              <s.icon className={`w-4 h-4 ${s.color}`} />
+              <span className="text-xs text-gray-400">{s.label}</span>
+            </div>
+            <span className="text-lg font-bold">{s.value}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Layer Tabs */}
+      <div className="flex gap-2 mb-4">
+        {Object.entries(layers).map(([key, layer]) => (
+          <button
+            key={key}
+            onClick={() => setActiveLayer(key)}
+            className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${activeLayer === key ? `bg-gradient-to-r ${layer.color} text-white` : 'bg-gray-900 text-gray-400 hover:bg-gray-800'}`}
+          >
+            <layer.icon className="w-4 h-4" />
+            {layer.title.split(' ')[0]}
+          </button>
+        ))}
+      </div>
+
+      {/* Main Content */}
+      <div className="grid grid-cols-3 gap-4">
+        {/* Layer Info */}
+        <div className="col-span-2 bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+          <div className={`flex items-center gap-3 mb-4 pb-3 border-b border-gray-800`}>
+            <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${layers[activeLayer].color} flex items-center justify-center`}>
+              {React.createElement(layers[activeLayer].icon, {className: "w-5 h-5"})}
+            </div>
+            <div>
+              <h2 className="font-semibold">{layers[activeLayer].title}</h2>
+              <p className="text-xs text-gray-400">{layers[activeLayer].description}</p>
+            </div>
+          </div>
+          
+          {/* Ecosystem Cards */}
+          <div className="grid grid-cols-2 gap-3">
+            {Object.entries(ecosystems).map(([key, eco]) => (
+              <div key={key} className="bg-gray-800/50 border border-gray-700 rounded-lg p-3 hover:border-gray-600 transition-all">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Box className="w-4 h-4 text-gray-400" />
+                    <span className="font-medium text-sm">{key.toUpperCase()}</span>
+                  </div>
+                  <StatusBadge status={eco.status} />
+                </div>
+                <p className="text-xs text-gray-500 mb-2 truncate">{eco.repo}</p>
+                <div className="flex items-center gap-2">
+                  <HealthBar value={eco.health} />
+                  <span className="text-xs text-gray-400 w-8">{eco.health}%</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Activity Log */}
+        <div className="bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+          <div className="flex items-center gap-2 mb-3">
+            <Radio className={`w-4 h-4 ${redTeamMode ? 'text-red-400 animate-pulse' : 'text-gray-400'}`} />
+            <span className="font-medium text-sm">Activity Log</span>
+          </div>
+          <div className="space-y-2 max-h-80 overflow-y-auto">
+            {logs.length === 0 ? (
+              <p className="text-xs text-gray-500 text-center py-8">No activity yet. Start Red Team mode to begin adversarial testing.</p>
+            ) : logs.map(log => (
+              <div key={log.id} className={`flex items-start gap-2 p-2 rounded-lg text-xs ${log.type === 'failure' ? 'bg-red-950/30 border border-red-900/50' : log.type === 'success' ? 'bg-emerald-950/30 border border-emerald-900/50' : 'bg-gray-800/50'}`}>
+                {log.type === 'failure' ? <XCircle className="w-3 h-3 text-red-400 mt-0.5 flex-shrink-0" /> : log.type === 'success' ? <CheckCircle className="w-3 h-3 text-emerald-400 mt-0.5 flex-shrink-0" /> : <Zap className="w-3 h-3 text-blue-400 mt-0.5 flex-shrink-0" />}
+                <div>
+                  <p className="text-gray-300">{log.message}</p>
+                  <p className="text-gray-500 mt-0.5">{log.time}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* Architecture Diagram */}
+      <div className="mt-4 bg-gray-900/50 border border-gray-800 rounded-xl p-4">
+        <h3 className="text-sm font-medium mb-3 flex items-center gap-2"><GitBranch className="w-4 h-4 text-purple-400" />Multi-Ecosystem Integration Architecture</h3>
+        <div className="grid grid-cols-4 gap-3 text-xs">
+          <div className="bg-purple-950/30 border border-purple-800/50 rounded-lg p-3">
+            <div className="font-medium text-purple-300 mb-2">Layer 1: Orchestration</div>
+            <ul className="space-y-1 text-gray-400">
+              <li>• MCP Protocol Hub</li>
+              <li>• A2A Communication</li>
+              <li>• Task Routing Engine</li>
+              <li>• State Management</li>
+            </ul>
+          </div>
+          <div className="bg-blue-950/30 border border-blue-800/50 rounded-lg p-3">
+            <div className="font-medium text-blue-300 mb-2">Layer 2: Intelligence</div>
+            <ul className="space-y-1 text-gray-400">
+              <li>• HRL Manager/Worker</li>
+              <li>• ACE Playbook Engine</li>
+              <li>• Generator/Reflector</li>
+              <li>• Context Curator</li>
+            </ul>
+          </div>
+          <div className="bg-emerald-950/30 border border-emerald-800/50 rounded-lg p-3">
+            <div className="font-medium text-emerald-300 mb-2">Layer 3: Governance</div>
+            <ul className="space-y-1 text-gray-400">
+              <li>• Compliance Gateway</li>
+              <li>• Security Scanner</li>
+              <li>• HITL Escalation</li>
+              <li>• Audit Trail</li>
+            </ul>
+          </div>
+          <div className="bg-orange-950/30 border border-orange-800/50 rounded-lg p-3">
+            <div className="font-medium text-orange-300 mb-2">Layer 4: Execution</div>
+            <ul className="space-y-1 text-gray-400">
+              <li>• Adaptive Learning</li>
+              <li>• Anomaly Detection</li>
+              <li>• Circuit Breakers</li>
+              <li>• Resilience Engine</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default SystemeOrchestrator;
