@@ -89,7 +89,7 @@ class EnhancedRedTeamEngine:
         logger.info(f"[RedTeam] Executing: {scenario['name']}")
 
         start = time.time()
-        attack_type = scenario.get("attack_type", scenario.get("category"))
+        attack_type = scenario.get("type", scenario.get("category"))
         handler = self._attack_handlers.get(attack_type)
 
         if not handler:
@@ -282,8 +282,41 @@ class EnhancedRedTeamEngine:
         return False, "Model poisoning protections present"
 
     async def _evasion_attack(self, scenario: Dict) -> tuple[bool, str]:
-        """Test detection evasion."""
-        raise NotImplementedError("Evasion attack handler is not yet implemented.")
+        """Test detection evasion by obfuscating payloads."""
+        payload = scenario.get("payload", {})
+        target_name = scenario.get("target")
+        obfuscation = payload.get("obfuscation", "none")
+        action_to_obfuscate = payload.get("action")
+
+        target_component = self.system.get(target_name)
+        if not target_component or not hasattr(target_component, 'validate_action'):
+            return False, f"Target {target_name} not a valid validation gateway"
+
+        if not action_to_obfuscate:
+            return False, "No action to obfuscate in payload"
+
+        obfuscated_action = dict(action_to_obfuscate)
+        original_type = action_to_obfuscate.get("type", "")
+
+        if obfuscation == "hex":
+            obfuscated_type = ''.join(f'\\x{ord(c):02x}' for c in original_type)
+        elif obfuscation == "unicode_confusable":
+            # Replace 'e' with a Greek Lunate Epsilon Symbol
+            obfuscated_type = original_type.replace('e', '\u03f5')
+        elif obfuscation == "unicode_mixed":
+            obfuscated_type = "d\u200belete_production_data"
+        else:
+            obfuscated_type = original_type
+
+        obfuscated_action["type"] = obfuscated_type
+
+        # The attack is successful if the gateway validates the obfuscated action
+        is_valid, msg = target_component.validate_action(obfuscated_action, "evasion_attacker")
+
+        if is_valid:
+            return True, f"Evasion successful with '{obfuscation}' on '{original_type}'. Gateway message: {msg}"
+        else:
+            return False, f"Evasion attempt with '{obfuscation}' on '{original_type}' was blocked. Gateway message: {msg}"
 
     def _generate_summary(self, results: List[AttackResult]) -> Dict:
         """Generate campaign summary."""

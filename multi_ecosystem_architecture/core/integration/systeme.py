@@ -11,10 +11,13 @@ from dataclasses import dataclass
 from typing import Dict, Optional, Any
 from pathlib import Path
 
+import os
 from core.layer1_orchestration.async_router import AsyncTaskRouter
 from core.layer2_hrl.manager import HRLManager
 from core.layer2_hrl.ace_playbook import ACEPlaybook, ACECurator
-from core.layer3_governance.enhanced_gateway import EnhancedGovernanceGateway
+from core.layer3_governance.hardened_gateway import HardenedGovernanceGateway
+from core.layer2_hrl.neural_uvfa import NeuralUVFA
+from core.validation.schemas import MessageSigner
 from core.red_team_engine.engine import EnhancedRedTeamEngine
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s [%(levelname)s] %(name)s: %(message)s')
@@ -49,15 +52,22 @@ class SystemeFactory:
         if config is None:
             config = SystemeFactory.load_config()
 
-        # Layer 2: HRL + ACE (must be created before router for dependency injection)
+        # Shared security components
+        secret_key_hex = os.environ.get("SECRET_KEY")
+        if not secret_key_hex:
+            raise ValueError("SECRET_KEY environment variable not set")
+        secret_key = bytes.fromhex(secret_key_hex)
+
+        # Layer 2: HRL with Neural UVFA
         playbook = ACEPlaybook(str(config.playbook_db_path))
         curator = ACECurator(playbook)
+        uvfa = NeuralUVFA(state_dim=32, goal_dim=16)
         manager = HRLManager(playbook_path=None)
 
-        # Layer 1: Orchestration
+        # Layer 1: Orchestration with validation
         router = AsyncTaskRouter(curator=curator)
 
-        # Layer 3: Governance
+        # Layer 3: Hardened Governance
         policies = {
             "disallowed_actions": [
                 "delete_production_data",
@@ -65,7 +75,14 @@ class SystemeFactory:
                 "execute_arbitrary_code"
             ]
         }
-        governance = EnhancedGovernanceGateway(policies, str(config.audit_log_path))
+        governance = HardenedGovernanceGateway(
+            policies,
+            str(config.audit_log_path),
+            secret_key=secret_key
+        )
+
+        # Message signer for A2A
+        signer = MessageSigner(secret_key)
 
         # Red Team
         system_components = {
@@ -73,6 +90,8 @@ class SystemeFactory:
             "governance_gateway": governance,
             "hrl_manager": manager,
             "ace_playbook": playbook,
+            "uvfa": uvfa,
+            "signer": signer,
         }
         red_team = EnhancedRedTeamEngine(str(config.red_team_playbook_path), system_components)
 
@@ -82,7 +101,9 @@ class SystemeFactory:
             "router": router,
             "governance": governance,
             "red_team": red_team,
-            "components": system_components
+            "components": system_components,
+            "uvfa": uvfa,
+            "signer": signer,
         }
 
 async def main():
