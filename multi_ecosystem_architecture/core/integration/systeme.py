@@ -53,7 +53,10 @@ class SystemeFactory:
             config = SystemeFactory.load_config()
 
         # Shared security components
-        secret_key = os.urandom(32)  # Or load from secure storage
+        secret_key_hex = os.environ.get("SECRET_KEY")
+        if not secret_key_hex:
+            raise ValueError("SECRET_KEY environment variable not set")
+        secret_key = bytes.fromhex(secret_key_hex)
 
         # Layer 2: HRL with Neural UVFA
         playbook = ACEPlaybook(str(config.playbook_db_path))

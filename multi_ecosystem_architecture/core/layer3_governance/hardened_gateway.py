@@ -9,6 +9,7 @@ import time
 import hashlib
 import hmac
 import logging
+import re
 from dataclasses import dataclass
 from typing import Dict, List, Tuple, Optional
 from pathlib import Path
@@ -79,6 +80,22 @@ class HardenedGovernanceGateway:
         self._pending_hitl: Dict[str, Dict] = {}
         self._hitl_timeout = 3600
         self._hitl_default_deny = True  # Critical: Default deny on timeout
+
+        # Pre-compile patterns for deep security scan
+        base_patterns = [
+            (r"eval\s*\(", "code_eval", "critical"),
+            (r"exec\s*\(", "code_exec", "critical"),
+            (r"__import__", "dynamic_import", "critical"),
+            (r"os\.system", "os_command", "critical"),
+            (r"subprocess", "subprocess", "high"),
+            (r"DROP\s+TABLE", "sql_drop", "critical"),
+            (r"DELETE\s+FROM", "sql_delete", "high"),
+            (r";\s*--", "sql_comment", "high"),
+            (r"rm\s+-rf", "destructive_command", "critical"),
+        ]
+        disallowed_actions = self.policies.get("disallowed_actions", [])
+        policy_patterns = [(re.escape(action), "policy_violation", "critical") for action in disallowed_actions]
+        self._scan_patterns = [(re.compile(p, re.IGNORECASE), n, s) for p, n, s in base_patterns + policy_patterns]
 
         logger.info("HardenedGovernanceGateway initialized")
 
@@ -155,35 +172,22 @@ class HardenedGovernanceGateway:
         Handles obfuscation, encoding tricks, and evasion attempts.
         """
         findings = []
-        patterns = [
-            (r"eval\s*\(", "code_eval", "critical"),
-            (r"exec\s*\(", "code_exec", "critical"),
-            (r"__import__", "dynamic_import", "critical"),
-            (r"os\.system", "os_command", "critical"),
-            (r"subprocess", "subprocess", "high"),
-            (r"DROP\s+TABLE", "sql_drop", "critical"),
-            (r"DELETE\s+FROM", "sql_delete", "high"),
-            (r";\s*--", "sql_comment", "high"),
-            (r"rm\s+-rf", "destructive_command", "critical"),
-        ]
-
-        import re
         import base64
 
         strings_to_scan = self._extract_strings(action)
 
         for content in strings_to_scan:
             # Layer 1: Direct pattern matching
-            for pattern, name, severity in patterns:
-                if re.search(pattern, content, re.IGNORECASE):
+            for pattern, name, severity in self._scan_patterns:
+                if pattern.search(content):
                     findings.append({"pattern": name, "severity": severity, "source": content[:50]})
 
             # Layer 2: Decode and rescan (catches hex/unicode obfuscation)
             try:
                 decoded = content.encode().decode('unicode_escape')
                 if decoded != content:
-                    for pattern, name, severity in patterns:
-                        if re.search(pattern, decoded, re.IGNORECASE):
+                    for pattern, name, severity in self._scan_patterns:
+                        if pattern.search(decoded):
                             findings.append({"pattern": f"{name}_obfuscated", "severity": severity, "source": content[:50]})
             except:
                 pass
@@ -194,8 +198,8 @@ class HardenedGovernanceGateway:
                 if len(content) % 4 != 0:
                     content += '=' * (4 - len(content) % 4)
                 decoded_b64 = base64.b64decode(content).decode('utf-8', errors='ignore')
-                for pattern, name, severity in patterns:
-                    if re.search(pattern, decoded_b64, re.IGNORECASE):
+                for pattern, name, severity in self._scan_patterns:
+                    if pattern.search(decoded_b64):
                         findings.append({"pattern": f"{name}_base64", "severity": severity, "source": content[:50]})
             except:
                 pass

@@ -437,6 +437,31 @@
           "remediation": "Enforce restrictive pod security standards"
         }
       ]
+    },
+    {
+      "category": "EVASION_ATTACKS",
+      "description": "Attacks designed to evade detection through obfuscation",
+      "target_ecosystem": "governance_gateway",
+      "attacks": [
+        {
+          "id": "GOV-005",
+          "name": "Hex-Encoded Evasion",
+          "severity": "high",
+          "type": "evasion",
+          "description": "Attempt to bypass action validation using hex encoding.",
+          "payload": {
+            "obfuscation": "hex",
+            "action": {
+              "type": "delete_production_data"
+            }
+          },
+          "expected_defense": "The HardenedGovernanceGateway should detect and block hex-encoded malicious actions.",
+          "success_indicators": [
+            "The gateway validates the hex-encoded action."
+          ],
+          "remediation": "Ensure the deep security scan in the governance gateway properly decodes and analyzes hex-encoded strings."
+        }
+      ]
     }
   ],
   "execution_config": {
