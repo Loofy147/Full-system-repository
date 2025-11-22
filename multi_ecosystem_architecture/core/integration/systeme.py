@@ -49,13 +49,13 @@ class SystemeFactory:
         if config is None:
             config = SystemeFactory.load_config()
 
-        # Layer 1: Orchestration
-        router = AsyncTaskRouter()
-
-        # Layer 2: HRL + ACE
+        # Layer 2: HRL + ACE (must be created before router for dependency injection)
         playbook = ACEPlaybook(str(config.playbook_db_path))
         curator = ACECurator(playbook)
         manager = HRLManager(playbook_path=None)
+
+        # Layer 1: Orchestration
+        router = AsyncTaskRouter(curator=curator)
 
         # Layer 3: Governance
         policies = {

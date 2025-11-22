@@ -93,7 +93,6 @@ class TestSecurityScanner:
 
     def test_detects_eval(self):
         """Scanner should detect eval() usage."""
-        from core.integration.systeme import EnhancedSecurityScanner
         scanner = EnhancedSecurityScanner()
 
         result = scanner.scan("user_input = eval(request.data)")
@@ -104,7 +103,6 @@ class TestSecurityScanner:
 
     def test_detects_sql_injection_patterns(self):
         """Scanner should detect SQL injection patterns."""
-        from core.integration.systeme import EnhancedSecurityScanner
         scanner = EnhancedSecurityScanner()
 
         payloads = [
@@ -118,7 +116,6 @@ class TestSecurityScanner:
 
     def test_detects_os_commands(self):
         """Scanner should detect dangerous OS commands."""
-        from core.integration.systeme import EnhancedSecurityScanner
         scanner = EnhancedSecurityScanner()
 
         result = scanner.scan("os.system('rm -rf /')")
@@ -128,7 +125,6 @@ class TestSecurityScanner:
 
     def test_passes_safe_content(self):
         """Scanner should pass safe content."""
-        from core.integration.systeme import EnhancedSecurityScanner
         scanner = EnhancedSecurityScanner()
 
         safe_content = [
@@ -143,7 +139,6 @@ class TestSecurityScanner:
 
     def test_detects_obfuscated_threats(self):
         """Scanner should detect unicode-obfuscated threats."""
-        from core.integration.systeme import EnhancedSecurityScanner
         scanner = EnhancedSecurityScanner()
 
         # Note: This tests the current implementation's capability
@@ -165,7 +160,6 @@ class TestGovernanceGateway:
 
     def test_blocks_disallowed_actions(self, governance_policies, temp_audit_log):
         """Gateway should block explicitly disallowed actions."""
-        from core.integration.systeme import EnhancedGovernanceGateway
         gateway = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
 
         for action_type in governance_policies["disallowed_actions"]:
@@ -175,7 +169,6 @@ class TestGovernanceGateway:
 
     def test_allows_valid_actions(self, governance_policies, temp_audit_log):
         """Gateway should allow valid actions."""
-        from core.integration.systeme import EnhancedGovernanceGateway
         gateway = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
 
         valid_actions = [
@@ -190,7 +183,6 @@ class TestGovernanceGateway:
 
     def test_blocks_security_violations(self, governance_policies, temp_audit_log):
         """Gateway should block actions with security violations."""
-        from core.integration.systeme import EnhancedGovernanceGateway
         gateway = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
 
         malicious_actions = [
@@ -204,7 +196,6 @@ class TestGovernanceGateway:
 
     def test_rate_limiting(self, governance_policies, temp_audit_log):
         """Gateway should enforce rate limits."""
-        from core.integration.systeme import EnhancedGovernanceGateway
         gateway = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
 
         # Make many requests from same agent
@@ -224,7 +215,6 @@ class TestGovernanceGateway:
     @pytest.mark.xfail(reason="VULNERABILITY: Unicode obfuscation bypasses policy check.")
     def test_unicode_bypass_prevention(self, governance_policies, temp_audit_log):
         """Gateway should prevent unicode obfuscation bypass."""
-        from core.integration.systeme import EnhancedGovernanceGateway
         gateway = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
 
         # Try to bypass with zero-width characters
@@ -238,7 +228,6 @@ class TestGovernanceGateway:
 
     def test_audit_trail_created(self, governance_policies, temp_audit_log):
         """Gateway should create audit trail entries."""
-        from core.integration.systeme import EnhancedGovernanceGateway
         gateway = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
 
         # Perform some actions
@@ -263,9 +252,7 @@ class TestAsyncTaskRouter:
     @pytest.mark.asyncio
     async def test_rejects_queue_overflow(self):
         """Router should reject tasks when queue is full."""
-        from core.integration.systeme import AsyncTaskRouter, Task, TaskPriority
-
-        router = AsyncTaskRouter(max_queue_size=10)
+        router = AsyncTaskRouter(curator=Mock(), max_queue_size=10)
 
         # Fill the queue
         for i in range(10):
@@ -287,9 +274,7 @@ class TestAsyncTaskRouter:
     @pytest.mark.asyncio
     async def test_handles_missing_capability(self):
         """Router should handle tasks for unregistered capabilities."""
-        from core.integration.systeme import AsyncTaskRouter, Task
-
-        router = AsyncTaskRouter()
+        router = AsyncTaskRouter(curator=Mock())
 
         task = Task(
             id="orphan_task",
@@ -306,8 +291,6 @@ class TestAsyncTaskRouter:
 
     def test_validates_task_schema(self):
         """Router should validate task structure."""
-        from core.integration.systeme import Task, TaskPriority
-
         # Valid task
         valid_task = Task(
             id="valid_1",
@@ -390,10 +373,6 @@ class TestRedTeamEngine:
     @pytest.mark.asyncio
     async def test_injection_attack_detection(self, red_team_playbook, governance_policies, temp_audit_log):
         """Red Team should detect injection vulnerabilities."""
-        from core.integration.systeme import (
-            EnhancedRedTeamEngine, EnhancedGovernanceGateway
-        )
-
         governance = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
 
         system = {
@@ -412,10 +391,6 @@ class TestRedTeamEngine:
     @pytest.mark.asyncio
     async def test_governance_bypass_detection(self, red_team_playbook, governance_policies, temp_audit_log):
         """Red Team should detect governance bypass vulnerabilities."""
-        from core.integration.systeme import (
-            EnhancedRedTeamEngine, EnhancedGovernanceGateway
-        )
-
         governance = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
 
         system = {
@@ -433,10 +408,6 @@ class TestRedTeamEngine:
     @pytest.mark.asyncio
     async def test_campaign_generates_report(self, red_team_playbook, governance_policies, temp_audit_log):
         """Red Team campaign should generate comprehensive report."""
-        from core.integration.systeme import (
-            EnhancedRedTeamEngine, EnhancedGovernanceGateway
-        )
-
         governance = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
 
         system = {
@@ -466,13 +437,9 @@ class TestSystemIntegration:
     @pytest.mark.asyncio
     async def test_full_attack_campaign(self, red_team_playbook, governance_policies, temp_audit_log):
         """Run full Red Team campaign and validate findings."""
-        from core.integration.systeme import (
-            EnhancedRedTeamEngine, EnhancedGovernanceGateway, AsyncTaskRouter
-        )
-
         # Build system
         governance = EnhancedGovernanceGateway(governance_policies, temp_audit_log)
-        router = AsyncTaskRouter()
+        router = AsyncTaskRouter(curator=Mock())
 
         system = {
             "governance_gateway": governance,

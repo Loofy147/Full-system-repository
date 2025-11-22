@@ -409,7 +409,7 @@ class ACECurator:
 
         return duplicates
 
-    def update_from_execution(self, result: Dict) -> Optional[str]:
+    async def update_from_execution(self, result: Dict) -> Optional[str]:
         """
         Update playbook based on task execution result.
         Called by HRL Manager after task completion.
@@ -417,7 +417,7 @@ class ACECurator:
         if result.get("success"):
             insight = result.get("insight")
             if insight and len(insight) > 10:
-                return self.playbook.add_bullet(
+                return await self.playbook.add_bullet(
                     content=insight,
                     section="strategies",
                     tags=result.get("tags", []),
@@ -426,7 +426,7 @@ class ACECurator:
         else:
             error = result.get("error")
             if error:
-                return self.playbook.add_bullet(
+                return await self.playbook.add_bullet(
                     content=f"AVOID: {error}",
                     section="pitfalls",
                     tags=["error", "avoid"],

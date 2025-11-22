@@ -33,7 +33,7 @@ class Task:
 class AsyncTaskRouter:
     """Enhanced async task router with priority queuing and dead letter handling."""
 
-    def __init__(self, max_queue_size: int = 1000):
+    def __init__(self, curator, max_queue_size: int = 1000):
         self.agents: Dict[str, Dict] = {}
         self._queues: Dict[TaskPriority, asyncio.PriorityQueue] = {
             p: asyncio.PriorityQueue(maxsize=max_queue_size) for p in TaskPriority
@@ -42,6 +42,7 @@ class AsyncTaskRouter:
         self._handlers: Dict[str, Callable] = {}
         self._running = False
         self._metrics = {"routed": 0, "failed": 0, "dlq": 0}
+        self.curator = curator
         logger.info("AsyncTaskRouter initialized")
 
     def register_agent(self, agent_id: str, capabilities: List[str], handler: Callable):
@@ -95,9 +96,13 @@ class AsyncTaskRouter:
             result = await handler(task)
             self._metrics["routed"] += 1
             logger.info(f"Task {task.id} completed successfully")
+            if self.curator and isinstance(result, dict):
+                await self.curator.update_from_execution(result)
             return result
         except Exception as e:
             logger.error(f"Task {task.id} failed: {e}")
+            if self.curator:
+                await self.curator.update_from_execution({"success": False, "error": str(e)})
             task.retries += 1
             if task.retries < task.max_retries:
                 await self.submit_task(task)
