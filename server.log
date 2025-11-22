@@ -1,0 +1,6 @@
+2025-11-22 20:23:21,397 [INFO] Système.WebServer: WebServer starting...
+2025-11-22 20:23:21,397 [INFO] Système.WebServer: Repo root detected as: /app
+2025-11-22 20:23:21,397 [INFO] Système.WebServer: Attempting to load ecosystem config from: /app/multi_ecosystem_architecture/ecosystem_config.yml
+2025-11-22 20:23:21,422 [INFO] Système.WebServer: Ecosystem config loaded successfully.
+2025-11-22 20:23:21,422 [INFO] Système.WebServer: Dashboard directory target: /app/dashboard
+2025-11-22 20:23:21,423 [ERROR] Système.WebServer: Dashboard directory not found at /app/dashboard. Aborting server start.

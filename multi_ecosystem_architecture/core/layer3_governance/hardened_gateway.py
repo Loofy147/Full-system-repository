@@ -215,7 +215,7 @@ class HardenedGovernanceGateway:
         return {"secure": True, "findings": [], "severity": None}
 
     def _extract_strings(self, obj, depth=0) -> List[str]:
-        """Recursively extract all string values from nested structure."""
+        """Recursively extract all strings from a nested structure, including dictionary keys."""
         if depth > 10:
             return []
 
@@ -223,7 +223,8 @@ class HardenedGovernanceGateway:
         if isinstance(obj, str):
             strings.append(obj)
         elif isinstance(obj, dict):
-            for v in obj.values():
+            for k, v in obj.items():
+                strings.append(k) # Scan dictionary keys
                 strings.extend(self._extract_strings(v, depth + 1))
         elif isinstance(obj, list):
             for item in obj:

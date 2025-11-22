@@ -1,0 +1,17 @@
+2025-11-22 20:30:01,621 [INFO] Système.NeuralUVFA: NeuralUVFA initialized: 48 → 64 → 5
+2025-11-22 20:30:01,622 [INFO] Système: AsyncTaskRouter initialized
+2025-11-22 20:30:01,623 [INFO] Système.Governance: HardenedGovernanceGateway initialized
+2025-11-22 20:30:01,623 [INFO] Système: [RedTeam] Normalized 22 scenarios from categories.
+2025-11-22 20:30:01,624 [INFO] Système: EnhancedRedTeamEngine initialized
+2025-11-22 20:30:01,624 [INFO] Système: Système factory initialization complete
+2025-11-22 20:30:01,624 [INFO] Système.WebServer: WebServer starting...
+2025-11-22 20:30:01,624 [INFO] Système.WebServer: Repo root detected as: /app
+2025-11-22 20:30:01,624 [INFO] Système.WebServer: Attempting to load ecosystem config from: /app/multi_ecosystem_architecture/ecosystem_config.yml
+2025-11-22 20:30:01,646 [INFO] Système.WebServer: Ecosystem config loaded successfully.
+2025-11-22 20:30:01,647 [INFO] Système.WebServer: Dashboard directory target: /app/multi_ecosystem_architecture/dashboard
+2025-11-22 20:30:01,647 [INFO] Système.WebServer: Changing current directory to /app/multi_ecosystem_architecture/dashboard
+2025-11-22 20:30:01,647 [INFO] Système.WebServer: Current directory is now: /app/multi_ecosystem_architecture/dashboard
+2025-11-22 20:30:01,648 [INFO] Système.WebServer: Starting server thread...
+2025-11-22 20:30:01,648 [INFO] Système.WebServer: Dashboard server started and listening on http://localhost:8080
+2025-11-22 20:30:01,648 [INFO] Système: Running dummy actions to populate audit log...
+2025-11-22 20:30:01,652 [INFO] Système: Dummy actions complete.

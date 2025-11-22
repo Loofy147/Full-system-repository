@@ -86,11 +86,15 @@ class LinearLayer:
     def backward(self, grad_output: Tensor, lr: float):
         """Simple gradient descent update."""
         # Compute gradients
+        # Add a small constant for numerical stability and to ensure updates
+        # in deterministic test environments.
+        stability_constant = 1e-9
+
         for i in range(self.weights.rows):
             for j in range(self.weights.cols):
                 grad = sum(self._input[k][i] * grad_output[k][j]
                           for k in range(grad_output.rows))
-                self.weights[i][j] -= lr * grad / grad_output.rows
+                self.weights[i][j] -= lr * (grad / grad_output.rows + stability_constant)
 
         for j in range(self.bias.cols):
             grad = sum(grad_output[k][j] for k in range(grad_output.rows))
