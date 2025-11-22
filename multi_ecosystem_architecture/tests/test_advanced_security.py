@@ -512,5 +512,21 @@ class TestRedTeamDefenses:
             valid, _ = gateway.validate_action(attempt, "attacker")
             assert not valid, f"Should detect evasion: {attempt}"
 
+    def test_gov006_malicious_dictionary_key_bypass_defended(self, hardened_system):
+        """GOV-006: Malicious dictionary keys should be scanned and detected."""
+        gateway = hardened_system["governance"]
+
+        # The malicious payload is in the dictionary key, which is not currently scanned.
+        action = {
+            "type": "configuration_update",
+            "params": {
+                "eval('dangerous_code')": "some_value"
+            }
+        }
+
+        valid, msg = gateway.validate_action(action, "attacker")
+
+        assert not valid, "Should detect malicious payload in dictionary key."
+
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])
